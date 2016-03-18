@@ -40,7 +40,8 @@ public class WizardFrame extends JInternalFrame {
 		JButton btnFinish = new JButton("Finish");
 		btnFinish.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				//TODO Settings writein
+				Conf.propertiesLocation = textField.getText();
+				Conf.writeIn();
 				dispose();
 			}
 		});

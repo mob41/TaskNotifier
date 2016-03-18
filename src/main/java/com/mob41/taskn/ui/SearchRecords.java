@@ -6,12 +6,22 @@ import javax.swing.JInternalFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.table.DefaultTableModel;
+
+import com.mob41.taskn.docrec.DocumentRecord;
+import com.mob41.taskn.tasks.Tasks;
+
 import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.awt.event.ActionEvent;
 
 public class SearchRecords extends JInternalFrame {
 	
@@ -40,8 +50,9 @@ public class SearchRecords extends JInternalFrame {
 	 * Create the frame.
 	 */
 	public SearchRecords() {
+		setClosable(true);
 		setTitle("Search records");
-		setBounds(100, 100, 656, 533);
+		setBounds(100, 100, 534, 528);
 		
 		JLabel lblSearchBy = new JLabel("Search by:");
 		
@@ -59,6 +70,11 @@ public class SearchRecords extends JInternalFrame {
 		JLabel lblQuery = new JLabel("Query:");
 		
 		queryFld = new JTextField();
+		queryFld.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				query();
+			}
+		});
 		queryFld.setColumns(10);
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -108,9 +124,70 @@ public class SearchRecords extends JInternalFrame {
 		
 		tablemodel = new DefaultTableModel();
 		table = new JTable(tablemodel);
+		tablemodel.setColumnIdentifiers(colident);
 		scrollPane.setViewportView(table);
 		getContentPane().setLayout(groupLayout);
 
+	}
+	
+	private void query(){
+		if(queryFld.getText().isEmpty()){
+			JOptionPane.showMessageDialog(null, "Query should not be blank.", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		List<String[]> result = new ArrayList<String[]>(100);
+		List<String[]> data;
+		String[] dataarr;
+		String[] build;
+		switch (targetbox.getSelectedIndex()){
+		case 0:
+			break;
+		case 1:
+			data = Tasks.getTableData();
+			switch (searchbybox.getSelectedIndex()){
+			case 0:
+				for (int i = 0; i < data.size(); i++){
+					dataarr = data.get(i);
+					if (dataarr[0].contains(queryFld.getText())){
+						build = new String[6];
+						build[0] = dataarr[0];
+						build[1] = dataarr[1];
+						build[2] = dataarr[2];
+						//TODO Categories on tasks.
+						build[3] = "Not implemented";
+						build[4] = "---";
+						build[5] = dataarr[3];
+						result.add(build);
+					}
+				}
+				break;
+			default:
+				//TODO Other searching methods.
+				System.out.println("Not implemented.");
+			}
+			break;
+		case 2:
+			data = DocumentRecord.getTableData();
+			switch (searchbybox.getSelectedIndex()){
+			case 0:
+				for (int i = 0; i < data.size(); i++){
+					dataarr = data.get(i);
+					if (dataarr[0].contains(queryFld.getText())){
+						result.add(dataarr);
+					}
+				}
+				break;
+			default:
+				//TODO Other searching methods.
+				System.out.println("Not implemented.");
+			}
+			break;		
+		}
+		tablemodel.setRowCount(0);
+		for (int i = 0; i < result.size(); i++){
+			tablemodel.addRow(result.get(i));
+		}
+		tablemodel.fireTableDataChanged();
 	}
 
 }

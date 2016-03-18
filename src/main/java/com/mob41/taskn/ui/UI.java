@@ -137,6 +137,14 @@ public class UI {
 		mnDocumentsRecord.add(separator);
 		
 		JMenuItem mntmSearch = new JMenuItem("Search");
+		mntmSearch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				SearchRecords search = new SearchRecords();
+				desktop.add(search);
+				search.setLocation(464, 11);
+				search.setVisible(true);
+			}
+		});
 		mnDocumentsRecord.add(mntmSearch);
 		
 		JMenu mnWindow = new JMenu("Window");
@@ -181,6 +189,7 @@ public class UI {
 			desktop.add(wizard);
 		} else {
 			openTaskList();
+			openSearch();
 		}
 	}
 	
@@ -190,5 +199,12 @@ public class UI {
 		tasklist.setLocation(10, 11);
 		tasklist.setVisible(true);
 		chckbxmntmTaskList.setSelected(true);
+	}
+	
+	public void openSearch(){
+		SearchRecords search = new SearchRecords();
+		desktop.add(search);
+		search.setLocation(464, 11);
+		search.setVisible(true);
 	}
 }
