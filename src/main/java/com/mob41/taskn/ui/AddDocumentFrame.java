@@ -16,11 +16,13 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import com.mob41.taskn.Conf;
 import com.mob41.taskn.cal.CalendarChooser;
 import com.mob41.taskn.docrec.DocumentRecord;
+import com.mob41.taskn.tasks.Tasks;
 
 import javax.swing.JComboBox;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
+import java.util.List;
 import java.awt.event.ActionEvent;
 
 public class AddDocumentFrame extends JInternalFrame {
@@ -65,7 +67,13 @@ public class AddDocumentFrame extends JInternalFrame {
 		
 		JLabel lblRelatedTask = new JLabel("Related Task:");
 		
-		relatedtask = new JComboBox();
+		List<String[]> tasks = Tasks.getTableData();
+		String[] tasknames = new String[tasks.size() + 1];
+		tasknames[0] = "None";
+		for (int i = 0; i < tasks.size(); i++){
+			tasknames[i + 1] = tasks.get(i)[0];
+		}
+		relatedtask = new JComboBox(tasknames);
 		
 		JButton btnCancel = new JButton("Cancel");
 		btnCancel.addActionListener(new ActionListener() {

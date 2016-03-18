@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.awt.event.ActionEvent;
+import javax.swing.JButton;
 
 public class SearchRecords extends JInternalFrame {
 	
@@ -30,7 +31,7 @@ public class SearchRecords extends JInternalFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private static final String[] colident = {"Name", "Deadline", "Import Time", "Category", "Related Task", "Prority"};
+	private static final String[] colident = {"Name", "Type", "Deadline", "Import Time", "Category", "Related Task", "Prority"};
 	
 	private static final String[] searchbychoices = {"Keyword", "Category", "Similar"};
 	
@@ -45,6 +46,7 @@ public class SearchRecords extends JInternalFrame {
 	private JComboBox sortbybox;
 
 	private DefaultTableModel tablemodel;
+	private JButton btnQuery;
 
 	/**
 	 * Create the frame.
@@ -78,6 +80,13 @@ public class SearchRecords extends JInternalFrame {
 		queryFld.setColumns(10);
 		
 		JScrollPane scrollPane = new JScrollPane();
+		
+		btnQuery = new JButton("Query");
+		btnQuery.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				query();
+			}
+		});
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -87,21 +96,23 @@ public class SearchRecords extends JInternalFrame {
 						.addGroup(groupLayout.createSequentialGroup()
 							.addComponent(lblSearchBy, GroupLayout.DEFAULT_SIZE, 52, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(searchbybox, 0, 155, Short.MAX_VALUE)
+							.addComponent(searchbybox, 0, 132, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(lblTarget, GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(targetbox, 0, 147, Short.MAX_VALUE)
+							.addComponent(targetbox, 0, 115, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(lblSortBy, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+							.addComponent(lblSortBy, GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(sortbybox, 0, 171, Short.MAX_VALUE))
+							.addComponent(sortbybox, 0, 104, Short.MAX_VALUE))
 						.addGroup(groupLayout.createSequentialGroup()
 							.addComponent(lblQuery)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(queryFld, GroupLayout.DEFAULT_SIZE, 582, Short.MAX_VALUE)))
+							.addComponent(queryFld, GroupLayout.DEFAULT_SIZE, 391, Short.MAX_VALUE)
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(btnQuery, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
 					.addContainerGap())
-				.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE)
+				.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 518, Short.MAX_VALUE)
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -110,77 +121,105 @@ public class SearchRecords extends JInternalFrame {
 					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblSearchBy)
 						.addComponent(searchbybox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(sortbybox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblTarget)
 						.addComponent(targetbox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblSortBy)
-						.addComponent(sortbybox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addComponent(lblSortBy))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblQuery)
-						.addComponent(queryFld, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addComponent(queryFld, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnQuery))
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 440, Short.MAX_VALUE))
+					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE))
 		);
 		
 		tablemodel = new DefaultTableModel();
-		table = new JTable(tablemodel);
+		table = new JTable(tablemodel){
+			@Override
+			public boolean isCellEditable(int row, int column){
+				return false;
+			}
+		};
 		tablemodel.setColumnIdentifiers(colident);
 		scrollPane.setViewportView(table);
 		getContentPane().setLayout(groupLayout);
-
+	}
+	
+	private List<String[]> queryTargetTasks(List<String[]> result){
+		String[] dataarr;
+		String[] build = null;
+		List<String[]> data = Tasks.getTableData();
+		switch (searchbybox.getSelectedIndex()){
+		case 0:
+			for (int i = 0; i < data.size(); i++){
+				dataarr = data.get(i);
+				if (dataarr[0].contains(queryFld.getText())){
+					build = new String[7];
+					build[0] = dataarr[0];
+					build[1] = "Task";
+					build[2] = dataarr[1];
+					build[3] = dataarr[2];
+					//TODO Categories on tasks.
+					build[4] = "Not implemented";
+					build[5] = "---";
+					build[6] = dataarr[3];
+					result.add(build);
+				}
+			}
+			break;
+		default:
+			//TODO Other searching methods.
+			System.out.println("Not implemented.");
+		}
+		return result;
+	}
+	
+	private List<String[]> queryTargetDocRec(List<String[]> result){
+		String[] dataarr;
+		String[] build;
+		List<String[]> data = DocumentRecord.getTableData();
+		switch (searchbybox.getSelectedIndex()){
+		case 0:
+			for (int i = 0; i < data.size(); i++){
+				dataarr = data.get(i);
+				if (dataarr[0].contains(queryFld.getText())){
+					build = new String[7];
+					build[0] = dataarr[0];
+					build[1] = "Document";
+					build[2] = dataarr[1];
+					build[3] = dataarr[2];
+					build[4] = dataarr[3];
+					build[5] = dataarr[4];
+					build[6] = dataarr[5];
+					result.add(build);
+				}
+			}
+			break;
+		default:
+			//TODO Other searching methods.
+			System.out.println("Not implemented.");
+		}
+		return result;
 	}
 	
 	private void query(){
 		if(queryFld.getText().isEmpty()){
-			JOptionPane.showMessageDialog(null, "Query should not be blank.", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Query field should not be blank.", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		List<String[]> result = new ArrayList<String[]>(100);
-		List<String[]> data;
-		String[] dataarr;
 		String[] build;
+		List<String[]> result = new ArrayList<String[]>(100);
 		switch (targetbox.getSelectedIndex()){
 		case 0:
+			result = queryTargetTasks(result);
+			result = queryTargetDocRec(result);
 			break;
 		case 1:
-			data = Tasks.getTableData();
-			switch (searchbybox.getSelectedIndex()){
-			case 0:
-				for (int i = 0; i < data.size(); i++){
-					dataarr = data.get(i);
-					if (dataarr[0].contains(queryFld.getText())){
-						build = new String[6];
-						build[0] = dataarr[0];
-						build[1] = dataarr[1];
-						build[2] = dataarr[2];
-						//TODO Categories on tasks.
-						build[3] = "Not implemented";
-						build[4] = "---";
-						build[5] = dataarr[3];
-						result.add(build);
-					}
-				}
-				break;
-			default:
-				//TODO Other searching methods.
-				System.out.println("Not implemented.");
-			}
+			result = queryTargetTasks(result);
 			break;
 		case 2:
-			data = DocumentRecord.getTableData();
-			switch (searchbybox.getSelectedIndex()){
-			case 0:
-				for (int i = 0; i < data.size(); i++){
-					dataarr = data.get(i);
-					if (dataarr[0].contains(queryFld.getText())){
-						result.add(dataarr);
-					}
-				}
-				break;
-			default:
-				//TODO Other searching methods.
-				System.out.println("Not implemented.");
-			}
+			result = queryTargetDocRec(result);
 			break;		
 		}
 		tablemodel.setRowCount(0);
